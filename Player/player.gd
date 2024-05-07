@@ -5,6 +5,10 @@ extends CharacterBody2D
 
 #This sets up our state for thee double jump
 var air_jump = false
+
+#Set up for seperating a wall jump for a double jump
+var just_wall_jumped = false
+
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
@@ -13,6 +17,7 @@ var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
 func _physics_process(delta):
 	apply_gravity(delta)
+	handle_wall_jump()
 	handle_jump()
 	# Ui left is the left arrow key and ui right is the right key
 	#left adds -1, right adds 1, and neither makes zero
@@ -32,6 +37,8 @@ func _physics_process(delta):
 	
 	if just_left_ledge:
 		coyote_jump_timer.start()
+		
+	just_wall_jumped = false
 
 func apply_gravity(delta):
 	# Add the gravity.
@@ -40,6 +47,29 @@ func apply_gravity(delta):
 		#Positive value is down with the "Y"
 		velocity.y += gravity * movement_data.gravity_scale * delta
 
+func handle_wall_jump():
+	#If the player isnt on the wall then we ignore this funciton 
+	#NOTE: this is works "is_on_wall_only" not the other funcitno "is_on_wall". This one is more specific than the other one
+	if not is_on_wall_only(): return
+	#Set up variable for wall jump
+	var wall_normal = get_wall_normal()
+	
+	if Input.is_action_just_pressed("ui_up"):
+		velocity.x = wall_normal.x * movement_data.SPEED
+		velocity.y = movement_data.JUMP_VELOCITY
+		just_wall_jumped = true
+	
+	#If the player touches the left wall we go right
+	#if Input.is_action_just_pressed("ui_up") and wall_normal == Vector2.LEFT:
+		#velocity.x = wall_normal.x * movement_data.SPEED
+		#velocity.y  = movement_data.JUMP_VELOCITY
+	#
+	#If player touches the right we go left
+	#if Input.is_action_just_pressed("ui_up") and wall_normal == Vector2.RIGHT:
+		#velocity.x = wall_normal.x * movement_data.SPEED
+		#velocity.y  = movement_data.JUMP_VELOCITY
+		
+		
 func handle_jump():
 	#This makes it so if we're not on the floor we can double jump
 	if is_on_floor(): air_jump = true
@@ -54,7 +84,8 @@ func handle_jump():
 		if Input.is_action_just_released("ui_accept") and velocity.y < movement_data.JUMP_VELOCITY / 2:
 			velocity.y = movement_data.JUMP_VELOCITY / 2
 		
-		if Input.is_action_just_pressed("ui_up") and air_jump:
+		#This is for our double jump condition
+		if Input.is_action_just_pressed("ui_up") and air_jump and not just_wall_jumped:
 			velocity.y = movement_data.JUMP_VELOCITY
 			air_jump = false
 			
