@@ -3,6 +3,8 @@ extends CharacterBody2D
 #We connected our resource through this making it so instead of setting up fvalues here we did it here
 @export var movement_data : PlayerMovementData
 
+#This sets up our state for thee double jump
+var air_jump = false
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
@@ -16,6 +18,7 @@ func _physics_process(delta):
 	#left adds -1, right adds 1, and neither makes zero
 	var input_axis = Input.get_axis("ui_left", "ui_right")
 	handle_acceleration(input_axis, delta)
+	handle_air_accelertation(input_axis, delta)
 	apply_friction(input_axis, delta)
 	apply_air_resistance(input_axis, delta)
 	update_animation(input_axis)
@@ -38,6 +41,9 @@ func apply_gravity(delta):
 		velocity.y += gravity * movement_data.gravity_scale * delta
 
 func handle_jump():
+	#This makes it so if we're not on the floor we can double jump
+	if is_on_floor(): air_jump = true
+	
 	#"Ui_accept" is th espace key on yhe kayboard
 	#The "Coyote_Jump_Timer"  checks if it's greater than 0 as well so we know that we can jump either on the floor or at a slight grace period after jumping
 	if is_on_floor() or coyote_jump_timer.time_left > 0.0:
@@ -48,6 +54,10 @@ func handle_jump():
 		if Input.is_action_just_released("ui_accept") and velocity.y < movement_data.JUMP_VELOCITY / 2:
 			velocity.y = movement_data.JUMP_VELOCITY / 2
 		
+		if Input.is_action_just_pressed("ui_up") and air_jump:
+			velocity.y = movement_data.JUMP_VELOCITY
+			air_jump = false
+			
 func apply_friction(input_axis, delta):
 	if input_axis == 0 and is_on_floor():
 		velocity.x = move_toward(velocity.x, 0, movement_data.FRICTION * delta)
@@ -58,9 +68,16 @@ func apply_air_resistance(input_axis, delta):
 		velocity.x = move_toward(velocity.x, 0, movement_data.air_resistance * delta)
 		
 func handle_acceleration(input_axis, delta):
+	#This will exit out he function if the player is not on the floor
+	if not is_on_floor(): return
 	# This is a shortened vers ion for if "direction != 0" so if we press left or right it will make a positive or ngative value not 0 giving us the direction our playerm oves in
 	if input_axis != 0:
 		velocity.x = move_toward(velocity.x,  movement_data.SPEED * input_axis, movement_data.ACCELERATION * delta)
+
+func handle_air_accelertation(input_axis, delta):
+	if is_on_floor(): return
+	if input_axis != 0:
+		velocity.x = move_toward(velocity.x, movement_data.SPEED * input_axis, movement_data.air_acceleration * delta)
 
 func update_animation(input_axis):
 	if input_axis != 0:
