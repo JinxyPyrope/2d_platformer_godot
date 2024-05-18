@@ -22,7 +22,7 @@ func _physics_process(delta):
 	handle_jump()
 	# Ui left is the left arrow key and ui right is the right key
 	#left adds -1, right adds 1, and neither makes zero
-	var input_axis = Input.get_axis("ui_left", "ui_right")
+	var input_axis = Input.get_axis("move_left", "move_right")
 	handle_acceleration(input_axis, delta)
 	handle_air_accelertation(input_axis, delta)
 	apply_friction(input_axis, delta)
@@ -55,13 +55,13 @@ func handle_wall_jump():
 	#Set up variable for wall jump
 	var wall_normal = get_wall_normal()
 	
-	if Input.is_action_just_pressed("ui_up"):
+	if Input.is_action_just_pressed("jump"):
 		velocity.x = wall_normal.x * movement_data.SPEED
 		velocity.y = movement_data.JUMP_VELOCITY
 		just_wall_jumped = true
 	
 	#If the player touches the left wall we go right
-	#if Input.is_action_just_pressed("ui_up") and wall_normal == Vector2.LEFT:
+	#if Input.is_action_just_pressed("jump") and wall_normal == Vector2.LEFT:
 		#velocity.x = wall_normal.x * movement_data.SPEED
 		#velocity.y  = movement_data.JUMP_VELOCITY
 	#
@@ -78,15 +78,15 @@ func handle_jump():
 	#"Ui_accept" is th espace key on yhe kayboard
 	#The "Coyote_Jump_Timer"  checks if it's greater than 0 as well so we know that we can jump either on the floor or at a slight grace period after jumping
 	if is_on_floor() or coyote_jump_timer.time_left > 0.0:
-		if Input.is_action_just_pressed("ui_up"):
+		if Input.is_action_just_pressed("jump"):
 			velocity.y = movement_data.JUMP_VELOCITY
 	#This is to checked to see if we are not on lthe floor then we can shorten the jump
 	elif not is_on_floor():
-		if Input.is_action_just_released("ui_accept") and velocity.y < movement_data.JUMP_VELOCITY / 2:
+		if Input.is_action_just_released("jump") and velocity.y < movement_data.JUMP_VELOCITY / 2:
 			velocity.y = movement_data.JUMP_VELOCITY / 2
 		
 		#This is for our double jump condition
-		if Input.is_action_just_pressed("ui_up") and air_jump and not just_wall_jumped:
+		if Input.is_action_just_pressed("jump") and air_jump and not just_wall_jumped:
 			velocity.y = movement_data.JUMP_VELOCITY
 			air_jump = false
 			
