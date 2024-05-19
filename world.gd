@@ -7,7 +7,6 @@ extends Node2D
 @onready var level_completed = $CanvasLayer/LevelCompleted
 
 func _ready():
-	RenderingServer.set_default_clear_color(Color.BLACK)
 	#This mkaes the "Polygon2d" color go with the shape of the collision shape we made
 	#From the level completed signal we  auotload, after being emitted when all hearts are collected this will come to connect
 	Events.level_completed.connect(show_level_completed)
@@ -18,6 +17,7 @@ func show_level_completed():
 	#If there's no variable in next level then we don't movee to a next level
 	if not next_level is PackedScene: return
 	get_tree().paused = true
+	await get_tree().create_timer(1.0).timeout
 	await LevelTransition.fade_to_black()
 	get_tree().paused = false
 	get_tree().change_scene_to_packed(next_level)

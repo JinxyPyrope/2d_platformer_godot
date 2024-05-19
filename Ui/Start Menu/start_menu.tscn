@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bpyd2lg3qnbg4"]
 
-[ext_resource type="Script" path="res://start_menu.gd" id="1_sknjv"]
+[ext_resource type="Script" path="res://Ui/Start Menu/start_menu.gd" id="1_sknjv"]
 
 [node name="StartMenu" type="CenterContainer"]
 anchors_preset = 15
@@ -15,10 +15,12 @@ layout_mode = 2
 
 [node name="StartGameButton" type="Button" parent="VBoxContainer"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(64, 16)
 layout_mode = 2
 text = "Start Game"
 
 [node name="QuitButton" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(64, 16)
 layout_mode = 2
 text = "Quit"
 
