@@ -12,9 +12,13 @@ var just_wall_jumped = false
 # Get the gravity from the project settings to be synced with RigidBody nodes.
 var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
+var was_wall_normal = Vector2.ZERO
+
 @onready var animated_sprite_2d = $AnimatedSprite2D
 @onready var coyote_jump_timer = $CoyoteJumpTimer
 @onready var starting_position = global_position
+@onready var wall_jump_timer = $WallJumpTimer
+
 
 func _physics_process(delta):
 	apply_gravity(delta)
@@ -30,6 +34,12 @@ func _physics_process(delta):
 	update_animation(input_axis)
 	#This variaible is placed to chack to see if the player was on the floor before we move
 	var was_on_floor = is_on_floor()
+	
+	#This variable is used for the walljumptimer to help fix the wall jumps inaccuracies
+	var was_on_wall = is_on_wall_only()
+	
+	if was_on_wall:
+		was_wall_normal = get_wall_normal()
 	#This method basically takes our velocity and moves the character by the velocity in the direction and slides it against any collisions. Basically as it shows move and slide agaist collisions
 	move_and_slide()
 	
@@ -38,9 +48,13 @@ func _physics_process(delta):
 	
 	if just_left_ledge:
 		coyote_jump_timer.start()
-		
 	just_wall_jumped = false
-
+	
+	#This checks so the player can't wall jump when thye're on the ground
+	var just_left_wall = was_on_wall and not is_on_wall()
+	if just_left_wall:
+		wall_jump_timer.start()
+	
 func apply_gravity(delta):
 	# Add the gravity.
 	# "Is_on_Floor is a func associated with "CharacterBody2D" (Or previously called KinematicBody2d) which is why we are using it here for gravity
@@ -51,9 +65,12 @@ func apply_gravity(delta):
 func handle_wall_jump():
 	#If the player isnt on the wall then we ignore this funciton 
 	#NOTE: this is works "is_on_wall_only" not the other funcitno "is_on_wall". This one is more specific than the other one
-	if not is_on_wall_only(): return
+	if not is_on_wall_only() and wall_jump_timer.time_left <= 0.0: return
 	#Set up variable for wall jump
 	var wall_normal = get_wall_normal()
+	if wall_jump_timer.time_left > 0.0:
+		wall_normal = was_wall_normal
+		
 	
 	if Input.is_action_just_pressed("jump"):
 		velocity.x = wall_normal.x * movement_data.SPEED
