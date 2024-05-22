@@ -16,6 +16,9 @@ var start_level_msec = 0.0
 
 
 func _ready():
+	if not next_level is PackedScene:
+		level_completed.next_level_button.text = "Victory Screen"
+		next_level = load("res://Ui/victory_screen.tscn")
 	#This mkaes the "Polygon2d" color go with the shape of the collision shape we made
 	#From the level completed signal we  auotload, after being emitted when all hearts are collected this will come to connect
 	Events.level_completed.connect(show_level_completed)
