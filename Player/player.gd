@@ -31,7 +31,7 @@ func _physics_process(delta):
 	handle_air_accelertation(input_axis, delta)
 	apply_friction(input_axis, delta)
 	apply_air_resistance(input_axis, delta)
-	update_animation(input_axis)
+	
 	#This variaible is placed to chack to see if the player was on the floor before we move
 	var was_on_floor = is_on_floor()
 	
@@ -54,6 +54,8 @@ func _physics_process(delta):
 	var just_left_wall = was_on_wall and not is_on_wall()
 	if just_left_wall:
 		wall_jump_timer.start()
+	
+	update_animation(input_axis)
 	
 func apply_gravity(delta):
 	# Add the gravity.
